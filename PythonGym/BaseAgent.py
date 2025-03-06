@@ -1,0 +1,114 @@
+import random
+import time
+from enum import Enum, auto
+
+NOTHING = 0
+UNBREAKABLE = 1
+BRICK = 2
+COMMAND_CENTER = 3
+PLAYER = 4
+SHELL = 5
+OTHER = 6
+
+
+
+def move_to_dir_action(dir):
+        return dir+1
+
+
+
+class BaseAgent:
+
+    class State(Enum):
+        EXPLORANDO = auto()
+        ATACANDO = auto()
+
+    state = State.EXPLORANDO
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+        self.command_center_dir = dir
+
+    #Devuelve el nombre del agente
+    def Name(self):
+        return self.name
+    #Devuelve el id del agente
+    def Id(self):
+        return self.id
+    #Metodo que se llama al iniciar el agente. No devuelve nada y sirve para contruir el agente
+    def Start(self):
+        print("Inicio del agente ")
+
+    #Metodo que se llama en cada actualización del agente, y se proporciona le vector de percepciones
+    #Devuelve la acción u el disparo si o no
+    def Update(self, perception):
+        print("Toma de decisiones del agente")
+        print(perception)    
+
+        self.analizar(perception)
+
+        if(self.state == self.State.EXPLORANDO):
+            return self.accion_explorar(self, perception)
+        elif(self.state == self.State.ATACANDO):
+            return self.accion_explorar(self, perception)
+        elif(self.state == self.State.EXPLORANDO):
+            return self.accion_explorar(self, perception)
+
+        action = random.randint(0,4)
+        return action, True
+    
+    #Metodo que se llama al finalizar el agente, se pasa el estado de terminacion
+    def End(self, win):
+        print("Agente finalizado")
+        print("Victoria ",win)
+
+    def analizar(self, perception):
+
+        element_found = False
+
+        for dir in range(0,4):
+            if perception[dir] == COMMAND_CENTER :
+                element_found = True
+                self.command_center_dir = dir
+
+
+                self.state = self.State.ATACANDO
+                break            
+            elif perception[dir] == PLAYER:
+                element_found = True
+                self.state = self.State.ATACANDO
+                break           
+            elif perception[dir] == SHELL:
+                self.state = self.State.ATACANDO
+                element_found = True
+                break
+
+        if element_found is False:
+            self.state = self.State.EXPLORANDO
+
+        return NOTHING, False
+
+
+    def accion_explorar(self, perception):
+        perception
+        action = move_to_dir_action(dir_empty)
+        return action, False
+       
+
+    def accion_disparar_command_centre(self, dir_command_centre):
+
+        action = move_to_dir_action(dir_command_centre)
+        return action, True
+
+    def accion_disparar_enemigo(self, dir_enemigo):
+
+        action = move_to_dir_action(dir_enemigo)
+        return action, True
+    
+    def accion_disparar_ladrillo(self, dir_ladrillo):
+
+        action = move_to_dir_action(dir_ladrillo)
+        return action, True
+
