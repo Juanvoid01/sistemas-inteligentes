@@ -5,7 +5,6 @@ from states.esquivar import EsquivarState
 from states.explorar import ExplorarState
 from states.romper import RomperState
 
-from enum import Enum, auto
 
 NOTHING = 0
 UNBREAKABLE = 1
@@ -21,8 +20,6 @@ def move_to_dir_action(dir):
         return dir+1
 
 
-State()
-
 class BaseAgent:
 
     def __init__(self, id, name):
@@ -35,7 +32,11 @@ class BaseAgent:
         "EsquivarState" : EsquivarState("EsquivarState"),
         "RomperState" : RomperState("RomperState")
         }
-        self.stateMachine:StateMachine = StateMachine("Basico",states_dict,"GoToCommandCenter")
+       
+
+        self.stateMachine:StateMachine = StateMachine("Basico",states_dict,"ExplorarState")
+       
+
 
     #Devuelve el nombre del agente
     def Name(self):
@@ -46,38 +47,23 @@ class BaseAgent:
     #Metodo que se llama al iniciar el agente. No devuelve nada y sirve para contruir el agente
     def Start(self):
         print("Inicio del agente ")
+        self.stateMachine.Start()
+
 
     #Metodo que se llama en cada actualización del agente, y se proporciona le vector de percepciones
     #Devuelve la acción u el disparo si o no
     def Update(self, perception):
         print("Toma de decisiones del agente")
         print(perception)
-        
-        vista_up, dist_up = perception[0], perception[4]
-        vista_down, dist_down = perception[1], perception[5]
-        vista_right, dist_right = perception[2], perception[6]
-        vista_left, dist_left = perception[3], perception[7]
-        player_x, player_y = perception[8], perception[9]
-        command_x, command_y = perception[10],  perception[11]
 
-
-
-        self.analizar(perception)
-
-        if(self.state == self.State.EXPLORANDO):
-            return self.accion_explorar(self, perception)
-        elif(self.state == self.State.ATACANDO):
-            return self.accion_explorar(self, perception)
-        elif(self.state == self.State.EXPLORANDO):
-            return self.accion_explorar(self, perception)
-
-        action = random.randint(0,4)
-        return action, True
+       
+        return self.stateMachine.Update(perception)
     
     #Metodo que se llama al finalizar el agente, se pasa el estado de terminacion
     def End(self, win):
         print("Agente finalizado")
         print("Victoria ",win)
+        self.stateMachine.End()
 
     def analizar(self, perception):
 
