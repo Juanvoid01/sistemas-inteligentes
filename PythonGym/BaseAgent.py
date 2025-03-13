@@ -1,5 +1,10 @@
 import random
-import time
+from StateMachine import StateMachine, State
+from states.atacar import AtacarState
+from states.esquivar import EsquivarState
+from states.explorar import ExplorarState
+from states.romper import RomperState
+
 from enum import Enum, auto
 
 NOTHING = 0
@@ -16,22 +21,21 @@ def move_to_dir_action(dir):
         return dir+1
 
 
+State()
 
 class BaseAgent:
-
-    class State(Enum):
-        EXPLORANDO = auto()
-        ATACANDO = auto()
-        ROMPIENDO = auto()
-        ESQUIVANDO = auto()
-
-    state = State.EXPLORANDO
 
     def __init__(self, id, name):
         self.id = id
         self.name = name
 
-        self.command_center_dir = dir
+        states_dict:dict[str,State] = {
+        "AtacarState" : AtacarState("AtacarState"),
+        "ExplorarState" : ExplorarState("ExplorarState"),
+        "EsquivarState" : EsquivarState("EsquivarState"),
+        "RomperState" : RomperState("RomperState")
+        }
+        self.stateMachine:StateMachine = StateMachine("Basico",states_dict,"GoToCommandCenter")
 
     #Devuelve el nombre del agente
     def Name(self):
