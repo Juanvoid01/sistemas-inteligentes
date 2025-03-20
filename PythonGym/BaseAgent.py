@@ -56,7 +56,7 @@ class BaseAgent:
         print("Toma de decisiones del agente")
         print(perception)
 
-       
+        print(self.stateMachine.curentState)
         return self.stateMachine.Update(perception)
     
     #Metodo que se llama al finalizar el agente, se pasa el estado de terminacion
@@ -90,26 +90,4 @@ class BaseAgent:
             self.state = self.State.EXPLORANDO
 
         return NOTHING, False
-
-
-    def accion_explorar(self, perception):
-        perception
-        action = move_to_dir_action(dir_empty)
-        return action, False
-       
-
-    def accion_disparar_command_centre(self, dir_command_centre):
-
-        action = move_to_dir_action(dir_command_centre)
-        return action, True
-
-    def accion_disparar_enemigo(self, dir_enemigo):
-
-        action = move_to_dir_action(dir_enemigo)
-        return action, True
-    
-    def accion_disparar_ladrillo(self, dir_ladrillo):
-
-        action = move_to_dir_action(dir_ladrillo)
-        return action, True
 

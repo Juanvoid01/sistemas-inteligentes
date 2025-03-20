@@ -34,4 +34,22 @@ class RomperState(State):
 
     #método que se llama para decidir la transición del estado. Devuelve el id del estado nuevo
     def Transit(self,perception):
+
+        vista_up, dist_up = perception[0], perception[4]
+        vista_down, dist_down = perception[1], perception[5]
+        vista_right, dist_right = perception[2], perception[6]
+        vista_left, dist_left = perception[3], perception[7]
+
+        '''if(vista_up == BRICK and dist_up <= 2):
+            print("Detectado brick up")
+            return "RomperState"
+        elif(vista_down == BRICK and dist_down <= 2):
+            print("Detectado brick down")
+            return "RomperState"
+        elif(vista_right == BRICK and dist_right <= 2):
+            print("Detectado right")
+            return "RomperState"
+        elif(vista_left == BRICK and dist_left <= 2):
+            print("Detectado left")
+            return "RomperState"'''
         return "ExplorarState"
