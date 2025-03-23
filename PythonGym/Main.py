@@ -1,5 +1,6 @@
 from LGymClient import agentLoop
-from BaseAgent import BaseAgent
+from JJ_Agent import JJ_Agent
 
-agent = BaseAgent("1","Isma")
+#agent = BaseAgent("1","Isma")
+agent = JJ_Agent("1","JJ_agent")
 agentLoop(agent,True)

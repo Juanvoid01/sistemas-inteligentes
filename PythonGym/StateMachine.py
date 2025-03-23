@@ -1,4 +1,5 @@
 from State import State
+from Perception import Perception
 
 class StateMachine(State):
     def __init__(self, id, states, initial):
@@ -13,7 +14,7 @@ class StateMachine(State):
 
     #Metodo que se llama en cada actualización del estado
     #devuelve las acciones (actuadores) que el agente realiza
-    def Update(self, perception):
+    def Update(self, perception: Perception) -> tuple[int, bool] :
         actions = self.states[self.curentState].Update(perception)
         newState=self.states[self.curentState].Transit(perception)
         if newState != self.curentState:
