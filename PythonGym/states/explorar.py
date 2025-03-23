@@ -54,8 +54,10 @@ class ExplorarState(State):
              #self.cont_stuck = 0
         
         # Si todas las ultimas posiciones son iguales, esta atascado
-        if len(set(self.last_positions)) == 1:
+        if len(set(self.last_positions)) == 1 and len(self.last_positions) == self.max_stuck:
             print("Agente atascado, se eligio random dir")
+            print(len(self.last_positions))
+            self.last_positions = []
             #comprobamos donde se puede mover, no hay muro en esa dir a dist<=2 
             valid_dirs=[dir for dir in [MOVE_UP,MOVE_DOWN,MOVE_LEFT,MOVE_RIGHT]if(perception[dir-1]!=UNBREAKABLE and perception[dir-1+4]<=2)]
             if valid_dirs:
@@ -63,39 +65,77 @@ class ExplorarState(State):
             else:
                 dir = random.randint(1, 4)  # Si no, elige aleatorio
 
+            self.dir_moving = dir
             return dir, False
-        else: #Ha cambiado de pos, deja de estar atascado
-             self.last_positions = []  # Reiniciar historial
+        #else: #Ha cambiado de pos, deja de estar atascado
+             #self.last_positions = []  # Reiniciar historial
 
 
         #self.past_agent_x = agent_x
         #self.past_agent_y = agent_y
         
-
+        dir = self.dir_moving
         #Nos movemos en direccion al Commmand Centre
+        '''dir_selected = False
         if(abs(agent_x - command_x) >= (abs(agent_y - command_y))):
-            if(agent_x < command_x):
+            if agent_x < command_x and perception[MOVE_RIGHT - 1] != UNBREAKABLE:
                 dir = MOVE_RIGHT
-            elif(agent_x > command_x):
+                dir_selected = True
+            elif(agent_x > command_x and perception[MOVE_LEFT - 1] != UNBREAKABLE):
                 dir = MOVE_LEFT
-        else:
-            if(agent_y < command_y):
+                dir_selected = True
+        if(not dir_selected):
+            if agent_y < command_y and perception[MOVE_UP - 1] != UNBREAKABLE:
                 dir = MOVE_UP
-            elif(agent_y > command_y):
-                dir = MOVE_DOWN
+            elif agent_y > command_y and perception[MOVE_DOWN - 1] != UNBREAKABLE:
+                dir = MOVE_DOWN'''
+        
+        # Guardamos las direcciones que van hacia el Command Center, siempre que no esten bloqueadas
+        preferred_dirs = []  # Array para guardar las dirs viables
+        horizontal_first = abs(agent_x - command_x) >= abs(agent_y - command_y)  # Prioridad en x si es mayor o igual
 
-        #Si la dir esta bloqueada, cambia de dir
-        #OJO COMPROBAR, PUEDE PERJUDICAR EL ENCONTRAR EL COMMAND CENTER
+        # Intentar primero en la direccion prioritaria(Donde hay mas dist con el Command Centre)
+        if horizontal_first:
+            if agent_x < command_x and perception[MOVE_RIGHT - 1] != UNBREAKABLE:
+                preferred_dirs.append(MOVE_RIGHT)
+            elif agent_x > command_x and perception[MOVE_LEFT - 1] != UNBREAKABLE:
+                preferred_dirs.append(MOVE_LEFT)
+        else:
+            if agent_y < command_y and perception[MOVE_UP - 1] != UNBREAKABLE:
+                preferred_dirs.append(MOVE_UP)
+            elif agent_y > command_y and perception[MOVE_DOWN - 1] != UNBREAKABLE:
+                preferred_dirs.append(MOVE_DOWN)
+
+        # Si no hay direcciones viables, probamos la otra direccion
+        if not preferred_dirs:
+            if not horizontal_first: # ahora al reves, donde hay menos dist con el Command Centre
+                if agent_x < command_x and perception[MOVE_RIGHT - 1] != UNBREAKABLE:
+                    preferred_dirs.append(MOVE_RIGHT)
+                elif agent_x > command_x and perception[MOVE_LEFT - 1] != UNBREAKABLE:
+                    preferred_dirs.append(MOVE_LEFT)
+            else:  
+                if agent_y < command_y and perception[MOVE_UP - 1] != UNBREAKABLE:
+                    preferred_dirs.append(MOVE_UP)
+                elif agent_y > command_y and perception[MOVE_DOWN - 1] != UNBREAKABLE:
+                    preferred_dirs.append(MOVE_DOWN)
+
+        # Si hay alguna direccion hacia el Command centre a la que se puede ir
+        if preferred_dirs:
+            dir = preferred_dirs[0]  #  la primera que se podia
+
+
+        #1Comprobar que no se va amover hacia un muro indestructible
         #while(perception[dir-1] == UNBREAKABLE and perception[dir-1+4] <= 2):
             #dir = random.randint(1,4)
-       
-        #Comprobar que no se va amover hacia un muro indestructible
-        if perception[dir - 1] == UNBREAKABLE and perception[dir-1+4] <= 2:
-            valid_dirs = [MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT]  
-            for new_dir in valid_dirs:
-                 if perception[new_dir - 1] != UNBREAKABLE:
-                    dir = new_dir 
-                    break
+
+        #2Comprobar que no se va amover hacia un muro indestructible
+        #if perception[dir - 1] == UNBREAKABLE and perception[dir-1+4] <= 2:
+            #valid_dirs = [MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT]
+            #print("Agente tiene unbreakeable delante, se eligio random dir")
+            #for new_dir in valid_dirs:
+                 #if perception[new_dir - 1] != UNBREAKABLE:
+                    #dir = new_dir 
+                    #break
             
         self.dir_moving = dir
         print(dir)
@@ -113,6 +153,7 @@ class ExplorarState(State):
          
         
         #Si despue de huir vemos un enemigo lo atacamos, sino exploramos
+        print(self.dir_moving)
         vista_moving_dir = perception[self.dir_moving -1]
 
        
