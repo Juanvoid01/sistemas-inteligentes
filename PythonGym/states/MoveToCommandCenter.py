@@ -30,29 +30,29 @@ class MoveToCommandCenter(State):
         # Check preferred direction
         object_p, dist_p = perception.object_in_dir(preferred_dir)
         if not (is_blocker[object_p] and dist_p <= 1.0):
-            return preferred_dir, False  # Move in preferred direction, no shooting
+            return preferred_dir, False 
 
         # Preferred direction is blocked, try second direction
         object_s, dist_s = perception.object_in_dir(second_dir)
         if not (is_blocker[object_s] and dist_s <= 1.0):
-            return second_dir, False  # Move in second direction, no shooting
+            return second_dir, False 
 
         # Both directions blocked, try to destroy obstacle in preferred direction
         if is_destroyable[object_p] and dist_p <= 1.0:
-            return preferred_dir, True  # Face preferred direction and shoot
+            return preferred_dir, True
 
         # Preferred direction not destroyable, try second direction
         if is_destroyable[object_s] and dist_s <= 1.0:
-            return second_dir, True  # Face second direction and shoot
+            return second_dir, True 
 
         # Choose a random direction
         random_dir = random.choice([DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT])
         object_r, dist_r = perception.object_in_dir(random_dir)
         shoot = is_destroyable[object_r] and dist_r <= 1.0
-        return random_dir, shoot  # Move or face random direction, shoot if breakable
+        return random_dir, shoot 
 
     def Transit(self, perception: Perception) -> str:
-        # Switch to EnemyEncounter if a player is detected
+        # Switch to EnemyEncounter if a player or shell is detected
         for dir in [DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT]:
             object, dist = perception.object_in_dir(dir)
             if object == Object.PLAYER or object == Object.SHELL:
@@ -60,7 +60,7 @@ class MoveToCommandCenter(State):
         delta_x = perception.command_center_x - perception.agent_x
         delta_y = perception.command_center_y - perception.agent_y
 
-        if (abs(delta_x) + abs(delta_y)) < 8.0:
+        if (abs(delta_x) + abs(delta_y)) <= 4.0:
             return "DestroyCommandCenter" # aproximation, if distance to command center < 8 
 
         return self.id

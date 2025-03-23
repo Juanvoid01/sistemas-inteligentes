@@ -16,13 +16,12 @@ class DestroyCommandCenter(State):
         for dir in [DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT]:
             object, dist = perception.object_in_dir(dir)
             if object == Object.COMMAND_CENTER:
-                return dir, True  # Move toward the command center and shoot it
+                return dir, True 
 
-        # Calculate deltas to the command center
+       
         delta_x = p.command_center_x - p.agent_x
         delta_y = p.command_center_y - p.agent_y
 
-        # Determine movement directions based on deltas
         move_dir_x = DIR_RIGHT if delta_x > 0 else DIR_LEFT
         move_dir_y = DIR_UP if delta_y > 0 else DIR_DOWN
 
@@ -49,9 +48,9 @@ class DestroyCommandCenter(State):
         return random_dir, True 
 
     def Transit(self, perception: Perception) -> str:
-        # Switch to EnemyEncounter if a player is detected
+        # Switch to EnemyEncounter if a player or shell is detected
         for dir in [DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT]:
             object, dist = perception.object_in_dir(dir)
-            if object == Object.PLAYER:
+            if object == Object.PLAYER or object == Object.SHELL:
                 return "EnemyEncounter"
         return self.id

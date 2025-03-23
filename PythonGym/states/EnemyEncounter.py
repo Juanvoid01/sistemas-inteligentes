@@ -23,10 +23,10 @@ class EnemyEncounter(State):
         return DIR_NOTHING, False
 
     def Transit(self, perception: Perception) -> str:
-        # Stay in EnemyEncounter if a player is still detected
+        # Stay in EnemyEncounter if a player or shell is still detected
         for dir in [DIR_UP, DIR_DOWN, DIR_RIGHT, DIR_LEFT]:
             object, dist = perception.object_in_dir(dir)
-            if object == Object.PLAYER:
+            if object == Object.PLAYER or object == Object.SHELL:
                 return self.id
 
         return "MoveToCommandCenter"
