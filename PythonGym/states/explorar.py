@@ -19,9 +19,11 @@ MOVE_LEFT = 4
 class ExplorarState(State):
 
     dir_moving = None
-    cont_stuck = 0
-    past_agent_x = -1
-    past_agent_y = -1
+    #cont_stuck = 0         #nº de veces que se mantiene en la misma posicion
+    #past_agent_x = -1      #pos de x anterior 
+    #past_agent_y = -1      #pos de y anterior
+    last_positions = []     # Historial de posiciones(x,y) de las ultimas max_stuck iteraciones
+    max_stuck = 6           #nº iteraciones para estar atascado
 
     def __init__(self, id):
         super().__init__(id)
@@ -32,17 +34,42 @@ class ExplorarState(State):
         agent_x = perception[12]
         agent_y = perception[13]
 
-        if(self.cont_stuck >= 6):
-            dir = random.randint(1,4)
-            print("Se eligio random dir")
+        #Guardamos la pos en el historial
+        self.last_positions.append((agent_x, agent_y))
+        if len(self.last_positions) > self.max_stuck: #Eliminar la pos mas vieja
+            self.last_positions.pop(0) 
+
+        #Si esta atascado, cambia de direccion
+        #if(self.cont_stuck >= 6):
+            #dir = random.randint(1,4)
+            #print("Se eligio random dir")
+            #self.cont_stuck = 0
+            #return dir, False
+        
+        #Si permanece en la misma posicion que antes, se incrementa el
+        #contador de atascado
+        #if(self.past_agent_x == agent_x and self.past_agent_y == agent_y):
+            #self.cont_stuck = self.cont_stuck + 1
+        #else:
+             #self.cont_stuck = 0
+        
+        # Si todas las ultimas posiciones son iguales, esta atascado
+        if len(set(self.last_positions)) == 1:
+            print("Agente atascado, se eligio random dir")
+            #comprobamos donde se puede mover, no hay muro en esa dir a dist<=2 
+            valid_dirs=[dir for dir in [MOVE_UP,MOVE_DOWN,MOVE_LEFT,MOVE_RIGHT]if(perception[dir-1]!=UNBREAKABLE and perception[dir-1+4]<=2)]
+            if valid_dirs:
+                dir = random.choice(valid_dirs)
+            else:
+                dir = random.randint(1, 4)  # Si no, elige aleatorio
+
             return dir, False
-            
-        if(self.past_agent_x == agent_x and self.past_agent_y == agent_y):
-            self.cont_stuck = self.cont_stuck + 1
-        else:
-             self.cont_stuck = 0
-        self.past_agent_x = agent_x
-        self.past_agent_y = agent_y
+        else: #Ha cambiado de pos, deja de estar atascado
+             self.last_positions = []  # Reiniciar historial
+
+
+        #self.past_agent_x = agent_x
+        #self.past_agent_y = agent_y
         
 
         #Nos movemos en direccion al Commmand Centre
@@ -57,9 +84,18 @@ class ExplorarState(State):
             elif(agent_y > command_y):
                 dir = MOVE_DOWN
 
-        while(perception[dir-1] == UNBREAKABLE and perception[dir-1+4] <= 2):
-            dir = random.randint(1,4)
-
+        #Si la dir esta bloqueada, cambia de dir
+        #OJO COMPROBAR, PUEDE PERJUDICAR EL ENCONTRAR EL COMMAND CENTER
+        #while(perception[dir-1] == UNBREAKABLE and perception[dir-1+4] <= 2):
+            #dir = random.randint(1,4)
+       
+        #Comprobar que no se va amover hacia un muro indestructible
+        if perception[dir - 1] == UNBREAKABLE and perception[dir-1+4] <= 2:
+            valid_dirs = [MOVE_UP, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT]  
+            for new_dir in valid_dirs:
+                 if perception[new_dir - 1] != UNBREAKABLE:
+                    dir = new_dir 
+                    break
             
         self.dir_moving = dir
         print(dir)
@@ -80,12 +116,15 @@ class ExplorarState(State):
         vista_moving_dir = perception[self.dir_moving -1]
 
        
+        #Comprobamos si podemos atacar al payer/Command Ctr/Shell, explorar o romper un ladrillo
         if(vista_up == PLAYER or vista_down == PLAYER or vista_left == PLAYER or vista_right == PLAYER):
            return "AtacarState"
-        elif(vista_moving_dir == BRICK): #si hay un ladrillo en su dir y esta en
-           return "RomperState"
         elif(vista_up == COMMAND_CENTER or vista_down == COMMAND_CENTER or vista_left == COMMAND_CENTER or vista_right == COMMAND_CENTER):
            return "AtacarState"
+        elif(vista_up == SHELL or vista_down == SHELL or vista_left == SHELL or vista_right == SHELL):
+           return "AtacarState"
+        elif(vista_moving_dir == BRICK):
+           return "RomperState"
         else:
            return "ExplorarState"
     
