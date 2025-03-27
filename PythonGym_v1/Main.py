@@ -1,6 +1,6 @@
 from LGymClient import agentLoop
 from BaseAgent import BaseAgent
-from ReactiveAgent import ReactiveAgent
+from PythonGym_v1.ReactiveAgent import ReactiveAgent
 from GoalOrientedAgent import GoalOrientedAgent
 
 
