@@ -54,6 +54,11 @@ class AStar:
     def ReconstructPath(self, goal):
         path = []
         #TODO: devuelve el path invertido desde la meta hasta que el padre sea None.
+        path = []
+        current = goal
+        while current is not None:
+            path.append(current)
+            current = current.GetParent()
         return path
 
 

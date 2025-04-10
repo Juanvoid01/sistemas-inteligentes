@@ -70,6 +70,8 @@ class GoalOrientedAgent(BaseAgent):
             #-Calcular el plan usando A*
             print("TODO aqui faltan cosas :)")
 
+            
+
              # Obtenemos la meta más prioritaria según el GoalMonitor
             current_goal = self.goalMonitor.GetCurrentGoal()
             
