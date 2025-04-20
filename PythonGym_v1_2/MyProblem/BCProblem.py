@@ -10,6 +10,8 @@ import numpy as np
 #Problema genérico.
 class BCProblem(Problem):
     
+    #xSize = None
+    #ySize = None
 
     def __init__(self, initial, goal, xSize, ySize):
         super().__init__(initial, goal)
@@ -22,6 +24,12 @@ class BCProblem(Problem):
         for i in range(len(m)):
             x,y = BCProblem.Vector2MatrixCoord(i,self.xSize,self.ySize)
             self.map[x][y] = m[i]
+
+    def YSize(self):
+        return self.ySize
+    
+    def XSize(self):
+        return self.xSize
 
     #Muestra el mapa por consola
     def ShowMap(self):
@@ -45,17 +53,17 @@ class BCProblem(Problem):
         successors = []
         #TODO: sucesores de un nodo dado
         print("Aqui falta ncosas por hacer :) ")
-        directions = [
+        vecinos = [
             (0, 1),  # Arriba
             (0, -1), # Abajo
             (1, 0),  # Derecha
             (-1, 0)  # Izquierda
         ]
     
-        for dx, dy in directions:
+        for dx, dy in vecinos:
             x, y = node.x + dx, node.y + dy #sumamos la posicion del nodo a la contigua para obtener el vecino
             if 0 <= x < self.xSize and 0 <= y < self.ySize:
-                if BCProblem.CanMove(self.map[x][y]):   #si el agente se puede mover aqui creamos el nodo
+                if BCProblem.CanMove(self.map[x][y]):   #si el agente se puede mover aqui, añadimos el nodo a la lista de sucesores
                     self.CreateNode(successors, node, x, y)
 
         return successors
@@ -111,13 +119,18 @@ class BCProblem(Problem):
     @staticmethod
     def GetCost(value):
         #TODO: debes darle un coste a cada tipo de casilla del mapa.
-
+        print("revisar costes objetos BCPROBLEM getCost ")
         cost_map = {
             AgentConsts.NOTHING: 1,       # Nada, coste mas bajo
             AgentConsts.BRICK: 10,        # Obstáculo destructible
-            AgentConsts.PLAYER: 50,       # Prioridad alta
+            AgentConsts.PLAYER: 40,       # Prioridad alta
             AgentConsts.LIFE: 2,          # Recompensa
-            AgentConsts.COMMAND_CENTER: 1 # Meta
+            AgentConsts.COMMAND_CENTER: 1, # Meta
+            AgentConsts.UNBREAKABLE: 100,
+            AgentConsts.SHELL: 60 ,
+            AgentConsts.OTHER: 50,
+            AgentConsts.SEMI_BREKABLE: 100,
+            AgentConsts.SEMI_UNBREKABLE: 100
         }
 
         return cost_map.get(value, sys.maxsize)  # Infinito para obstáculos

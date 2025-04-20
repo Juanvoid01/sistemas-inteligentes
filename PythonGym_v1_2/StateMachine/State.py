@@ -15,8 +15,6 @@ class State:
     def Transit(self,perception, map):
         return self.id
 
-
-    
     #Metodo que se llama al finalizar el estado
     def End(self):
         print("fin del estado")

@@ -126,6 +126,31 @@ class GoalOrientedAgent(BaseAgent):
         goal3Player = self._CreatePlayerGoal(perception)
         self.goalMonitor = GoalMonitor(self.problem,[goal1CommanCenter,goal2Life,goal3Player])
 
+
+        initial_node = self._CreateInitialNode(perception)
+        goal1 = self._CreateDefaultGoal(perception)
+        goal2 = self._CreateLifeGoal(perception)
+        goal3 = self._CreatePlayerGoal(perception)
+
+
+        # Obtener dimensiones del mapa
+        #self.xSize = sqrt(len(map))     # Ancho (columnas)
+        #self.ySize = len(map[0])   # Alto (filas)
+        #print("GoalOrientedAgent InitAgent Revisar que map es una lista 2D para obtener sus dimensiones")
+
+        # Calcular dimensiones del mapa (asumiendo que es cuadrado)
+        map_size = int(len(map)**0.5)  # Si el mapa es 1D y cuadrado (ej: 15x15)
+        self.xSize = map_size
+        self.ySize = map_size
+        
+        self.problem = BCProblem(initial_node, goal1, self.xSize, self.ySize)
+        self.problem.InitMap(map)
+        self.aStar = AStar(self.problem)
+        self.goalMonitor = GoalMonitor(self.problem, [goal1, goal2, goal3])
+        self.plan = self._CreatePlan(perception, map)
+
+       
+
     #muestra un plan por consola
     @staticmethod
     def ShowPlan(plan):
