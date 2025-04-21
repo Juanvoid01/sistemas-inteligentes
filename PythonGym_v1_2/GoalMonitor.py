@@ -112,7 +112,7 @@ class GoalMonitor:
             return False  # No hay power-up en el mapa
         
         distance = math.sqrt((life_x - agent_x)**2 + (life_y - agent_y)**2)
-        return distance < 4.0  # Considerar "cerca" si está a menos de 4 unidades
+        return distance < 6.0  # Considerar "cerca" si está a menos de 6 unidades
 
     def _IsGoalValid(self, goal):
         # Verifica si la meta existe y es alcanzable

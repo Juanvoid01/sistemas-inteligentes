@@ -43,16 +43,15 @@ class BCProblem(Problem):
     #la heurística típica es la distancia manhattan o euclidiana. Dado que el movimiento es en cuadrícula, mejor manhattan. La heurística #debería calcular la distancia desde el nodo actual hasta el objetivo.
     def Heuristic(self, node):
         #TODO: heurística del nodo
-        print("Aqui falta ncosas por hacer BCPROBLEM Heuristic :) ")
+        #print(" BCPROBLEM Heuristic Comporbar ")
         return abs(node.x - self.goal.x) + abs(node.y - self.goal.y)
-        return 0
 
     #Genera la lista de sucesores del nodo (Se necesita reimplementar)
     # los nodos adyacentes (arriba, abajo, izquierda, derecha), verificando si es posible moverse a esas celdas usando `CanMove`. Además, calcular #el costo de cada movimiento usando GetCost
     def GetSucessors(self, node):
         successors = []
         #TODO: sucesores de un nodo dado
-        print("Aqui falta ncosas por hacer :) ")
+        #print("BCPROBLEM GetSucessors hecho")
         vecinos = [
             (0, 1),  # Arriba
             (0, -1), # Abajo
@@ -119,7 +118,7 @@ class BCProblem(Problem):
     @staticmethod
     def GetCost(value):
         #TODO: debes darle un coste a cada tipo de casilla del mapa.
-        print("revisar costes objetos BCPROBLEM getCost ")
+        #print("revisar costes objetos BCPROBLEM getCost ")
         cost_map = {
             AgentConsts.NOTHING: 1,       # Nada, coste mas bajo
             AgentConsts.BRICK: 10,        # Obstáculo destructible
@@ -134,7 +133,7 @@ class BCProblem(Problem):
         }
 
         return cost_map.get(value, sys.maxsize)  # Infinito para obstáculos
-        return sys.maxsize
+        #return sys.maxsize
     
     #crea un nodo y lo añade a successors (lista) con el padre indicado y la posición x,y en coordenadas mapa 
     def CreateNode(self,successors,parent,x,y):

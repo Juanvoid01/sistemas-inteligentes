@@ -66,70 +66,70 @@ class AStar:
 
 
 
-#bucle principal de A*
-def Solve(self, problem, initial_node):
-        self.problem = problem
-        self.open = []
-        self.processed = set()
-        
-        initial_node.SetH(self.problem.Heuristic(initial_node))
-        self.open.append(initial_node)
-        
-        while len(self.open) > 0:
-            current = self._GetLowestFNode()
+    #bucle principal de A*
+    def Solve(self, problem, initial_node):
+            self.problem = problem
+            self.open = []
+            self.processed = set()
             
-            if self.problem.IsASolution(current):
-                self.solution = self.ReconstructPath(current)
-                return True
+            initial_node.SetH(self.problem.Heuristic(initial_node))
+            self.open.append(initial_node)
+            
+            while len(self.open) > 0:
+                current = self._GetLowestFNode()
                 
-            self.processed.add(current)
+                if self.problem.IsASolution(current):
+                    self.solution = self.ReconstructPath(current)
+                    return True
+                    
+                self.processed.add(current)
+                
+                successors = self.problem.GetSucessors(current)
+                for successor in successors:
+                    self._ProcessSuccessor(successor, current)
             
-            successors = self.problem.GetSucessors(current)
-            for successor in successors:
-                self._ProcessSuccessor(successor, current)
-        
-        return False  # No se encontró solución
+            return False  # No se encontró solución
 
 
-def GetPlan(self):
-    return self.solution[::-1]  # Devuelve el camino invertido
+    def GetPlan(self):
+        return self.solution[::-1]  # Devuelve el camino invertido
 
-def _GetLowestFNode(self):
-    self.open.sort(key=lambda x: x.F())
-    return self.open.pop(0)
+    def _GetLowestFNode(self):
+        self.open.sort(key=lambda x: x.F())
+        return self.open.pop(0)
 
-def _ProcessSuccessor(self, successor, parent):
-    new_g = parent.G() + self.problem.GetGCost(parent, successor)
-    
-    # Si ya está en procesados
-    if successor in self.processed:
-        if new_g < successor.G():
-            self.processed.remove(successor)
-            self.open.append(successor)
+    def _ProcessSuccessor(self, successor, parent):
+        #new_g = parent.G() + self.problem.GetGCost(parent, successor)
+        new_g = parent.G() + self.problem.GetGCost(successor)
+        # Si ya está en procesados
+        if successor in self.processed:
+            if new_g < successor.G():
+                self.processed.remove(successor)
+                self.open.append(successor)
+            else:
+                return
+                
+        # Si ya está en abiertos
+        in_open = next((n for n in self.open if n == successor), None)
+        if in_open:
+            if new_g < in_open.G():
+                self._ConfigureNode(in_open, parent, new_g)
         else:
-            return
-            
-    # Si ya está en abiertos
-    in_open = next((n for n in self.open if n == successor), None)
-    if in_open:
-        if new_g < in_open.G():
-            self._ConfigureNode(in_open, parent, new_g)
-    else:
-        self._ConfigureNode(successor, parent, new_g)
-        successor.SetH(self.problem.Heuristic(successor))
-        self.open.append(successor)
+            self._ConfigureNode(successor, parent, new_g)
+            successor.SetH(self.problem.Heuristic(successor))
+            self.open.append(successor)
 
-def _ConfigureNode(self, node, parent, new_g):
-    node.SetParent(parent)
-    node.SetG(new_g)
+    def _ConfigureNode(self, node, parent, new_g):
+        node.SetParent(parent)
+        node.SetG(new_g)
 
-def ReconstructPath(self, goal):
-    path = []
-    current = goal
-    while current is not None:
-        path.append(current)
-        current = current.GetParent()
-    return path
+    def ReconstructPath(self, goal):
+        path = []
+        current = goal
+        while current is not None:
+            path.append(current)
+            current = current.GetParent()
+        return path
 
 
         
