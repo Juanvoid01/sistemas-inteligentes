@@ -40,8 +40,32 @@ class GoalMonitor:
             return True
 
         return False
-
+    
     def SelectGoal(self, perception, map, agent):
+        health = perception[AgentConsts.HEALTH]
+        player_near = self._IsPlayerNear(perception)
+        life_near = self._IsLifeNear(perception)
+        command_center_near = self._IsCommandCenterNear(perception)  # Nuevo método
+
+        # 1. Salud crítica y vida cerca
+        if health < 25.0 and life_near and self._IsGoalValid(self.goals[self.GOAL_LIFE]):
+            self.current_goal = self.goals[self.GOAL_LIFE]
+
+        # 2. Jugador cerca (prioridad sobre centro de comando)
+        elif player_near and self._IsGoalValid(self.goals[self.GOAL_PLAYER]):
+            self.current_goal = self.goals[self.GOAL_PLAYER]
+
+        # 3. Centro de comando cerca
+        elif command_center_near and self._IsGoalValid(self.goals[self.GOAL_COMMAND_CENTER]):
+            self.current_goal = self.goals[self.GOAL_COMMAND_CENTER]
+
+        # 4. Default: Centro de comando (aunque no esté cerca)
+        else:
+            self.current_goal = self.goals[self.GOAL_COMMAND_CENTER]
+
+        return self.current_goal
+
+    '''def SelectGoal(self, perception, map, agent):
         health = perception[AgentConsts.HEALTH]
         player_near = self._IsPlayerNear(perception)
         life_near = self._IsLifeNear(perception)
@@ -62,7 +86,7 @@ class GoalMonitor:
         #else:
             #self.current_goal = self.goals[0]  # Fallback
 
-        return self.current_goal
+        return self.current_goal'''
     
 
     '''def SelectGoal(self, perception, map, agent):
@@ -89,6 +113,16 @@ class GoalMonitor:
 
 
     # ------------------- Métodos auxiliares -------------------
+
+    def _IsCommandCenterNear(self, perception):
+        command_x = perception[AgentConsts.COMMAND_CENTER_X]
+        command_y = perception[AgentConsts.COMMAND_CENTER_Y]
+        agent_x = perception[AgentConsts.AGENT_X]
+        agent_y = perception[AgentConsts.AGENT_Y]
+        
+        distance = math.sqrt((command_x - agent_x)**2 + (command_y - agent_y)**2)
+        return distance < 3.0  # < 3 unidades
+
     def _IsPlayerNear(self, perception):
         # Obtener coordenadas del jugador y del agente
         player_x = perception[AgentConsts.PLAYER_X]

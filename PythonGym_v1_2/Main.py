@@ -4,7 +4,7 @@ from LGymClient import agentLoop
 from GoalOrientedAgent import GoalOrientedAgent
 
 
-agent = GoalOrientedAgent("1","MiniJuan")
+agent = GoalOrientedAgent("1","JJ")
 agentLoop(agent,True)
 
  
