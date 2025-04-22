@@ -1,3 +1,4 @@
+#Node.py
 
 #Nodo genérico de un algortimos de búsqueda heurística
 class Node:

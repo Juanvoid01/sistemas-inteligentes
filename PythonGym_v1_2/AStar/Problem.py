@@ -1,17 +1,20 @@
+#Problem.py
+from AStar.Node import Node
+
 class Problem:
     
-    def __init__(self, initial, goal):
-        self.initial = initial
-        self.goal = goal
+    def __init__(self, initial:Node, goal:Node):
+        self.initial:Node = initial
+        self.goal:Node = goal
 
-    def Initial(self):
+    def Initial(self) -> Node: 
         return self.initial
 
-    def IsASolution(self, node):
+    def IsASolution(self, node) -> bool:
         return node == self.goal
 
     #Calcula la heuristica del nodo en base al problema planteado (Se necesita reimplementar)
-    def Heuristic(self, node):
+    def Heuristic(self, node) -> float:
         raise NotImplementedError("Heuristic no implementado")
         return 0.0
 

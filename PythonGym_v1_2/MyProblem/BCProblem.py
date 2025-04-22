@@ -10,10 +10,8 @@ import numpy as np
 #Problema genérico.
 class BCProblem(Problem):
     
-    #xSize = None
-    #ySize = None
 
-    def __init__(self, initial, goal, xSize, ySize):
+    def __init__(self, initial:BCNode, goal:BCNode, xSize, ySize):
         super().__init__(initial, goal)
         self.map = np.zeros((xSize,ySize),dtype=int)
         self.xSize = xSize
@@ -25,12 +23,6 @@ class BCProblem(Problem):
             x,y = BCProblem.Vector2MatrixCoord(i,self.xSize,self.ySize)
             self.map[x][y] = m[i]
 
-    def YSize(self):
-        return self.ySize
-    
-    def XSize(self):
-        return self.xSize
-
     #Muestra el mapa por consola
     def ShowMap(self):
         for j in range(self.ySize):
@@ -40,31 +32,24 @@ class BCProblem(Problem):
             print(s)
 
     #Calcula la heuristica del nodo en base al problema planteado (Se necesita reimplementar)
-    #la heurística típica es la distancia manhattan o euclidiana. Dado que el movimiento es en cuadrícula, mejor manhattan. La heurística #debería calcular la distancia desde el nodo actual hasta el objetivo.
-    def Heuristic(self, node):
+    def Heuristic(self, node:BCNode) -> float:
         #TODO: heurística del nodo
-        #print(" BCPROBLEM Heuristic Comporbar ")
-        return abs(node.x - self.goal.x) + abs(node.y - self.goal.y)
+        # usamos la heurística de distancia manhattan hasta el nodo goal
+        return abs(self.goal.x - node.x) + abs(self.goal.y - node.y)
 
     #Genera la lista de sucesores del nodo (Se necesita reimplementar)
-    # los nodos adyacentes (arriba, abajo, izquierda, derecha), verificando si es posible moverse a esas celdas usando `CanMove`. Además, calcular #el costo de cada movimiento usando GetCost
-    def GetSucessors(self, node):
-        successors = []
+    def GetSucessors(self, node:BCNode) -> list[BCNode]:
+        successors: list[BCNode] = []
         #TODO: sucesores de un nodo dado
-        #print("BCPROBLEM GetSucessors hecho")
-        vecinos = [
-            (0, 1),  # Arriba
-            (0, -1), # Abajo
-            (1, 0),  # Derecha
-            (-1, 0)  # Izquierda
-        ]
-    
-        for dx, dy in vecinos:
-            x, y = node.x + dx, node.y + dy #sumamos la posicion del nodo a la contigua para obtener el vecino
-            if 0 <= x < self.xSize and 0 <= y < self.ySize:
-                if BCProblem.CanMove(self.map[x][y]):   #si el agente se puede mover aqui, añadimos el nodo a la lista de sucesores
-                    self.CreateNode(successors, node, x, y)
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
+        for dir_x, dir_y in directions:
+            successor_x = node.x + dir_x
+            successor_y = node.y + dir_y
+            if 0 <= successor_x < self.xSize and 0 <= successor_y < self.ySize:
+                successor:AgentConsts = self.map[successor_x][successor_y]
+                if BCProblem.CanMove(successor):
+                    self.CreateNode(successors, node, successor_x, successor_y)
         return successors
     
     #métodos estáticos
@@ -113,27 +98,26 @@ class BCProblem(Problem):
         invY = invY / 2
         return x, invY
 
-    #se utiliza para calcular el coste de cada elemento del mapa
-    #Las celdas transitables tienen costo bajo, con obstaculo tienen coste alto o infinito
-    @staticmethod
-    def GetCost(value):
-        #TODO: debes darle un coste a cada tipo de casilla del mapa.
-        #print("revisar costes objetos BCPROBLEM getCost ")
-        cost_map = {
-            AgentConsts.NOTHING: 1,       # Nada, coste mas bajo
-            AgentConsts.BRICK: 10,        # Obstáculo destructible
-            AgentConsts.PLAYER: 40,       # Prioridad alta
-            AgentConsts.LIFE: 2,          # Recompensa
-            AgentConsts.COMMAND_CENTER: 1, # Meta
-            AgentConsts.UNBREAKABLE: 100,
-            AgentConsts.SHELL: 60 ,
-            AgentConsts.OTHER: 50,
-            AgentConsts.SEMI_BREKABLE: 100,
-            AgentConsts.SEMI_UNBREKABLE: 100
-        }
+    # Costes por tipo de casilla
+    COST_OBJECT_TABLE: dict[AgentConsts, int] = {
+        AgentConsts.NOTHING: 1,       # Nada, coste mas bajo
+        AgentConsts.BRICK: 10,        # Obstáculo destructible
+        AgentConsts.PLAYER: 40,       # Prioridad alta
+        AgentConsts.LIFE: 2,          # Recompensa
+        AgentConsts.COMMAND_CENTER: 1, # Meta
+        AgentConsts.UNBREAKABLE: 100,
+        AgentConsts.SHELL: 60 ,
+        AgentConsts.OTHER: 50,
+        AgentConsts.SEMI_BREKABLE: 100,
+        AgentConsts.SEMI_UNBREKABLE: 100
+    }
 
-        return cost_map.get(value, sys.maxsize)  # Infinito para obstáculos
-        #return sys.maxsize
+    #se utiliza para calcular el coste de cada elemento del mapa 
+    @staticmethod
+    def GetCost(value:AgentConsts) -> int:
+        #TODO: debes darle un coste a cada tipo de casilla del mapa.
+        return BCProblem.COST_OBJECT_TABLE.get(value, sys.maxsize)
+
     
     #crea un nodo y lo añade a successors (lista) con el padre indicado y la posición x,y en coordenadas mapa 
     def CreateNode(self,successors,parent,x,y):
