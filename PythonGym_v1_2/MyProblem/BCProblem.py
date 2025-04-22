@@ -35,21 +35,26 @@ class BCProblem(Problem):
     def Heuristic(self, node:BCNode) -> float:
         #TODO: heurística del nodo
         # usamos la heurística de distancia manhattan hasta el nodo goal
-        return abs(self.goal.x - node.x) + abs(self.goal.y - node.y)
-
+        return abs(node.x - self.goal.x) + abs(node.y - self.goal.y)
+    
     #Genera la lista de sucesores del nodo (Se necesita reimplementar)
     def GetSucessors(self, node:BCNode) -> list[BCNode]:
         successors: list[BCNode] = []
         #TODO: sucesores de un nodo dado
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        #print("BCPROBLEM GetSucessors hecho")
+        vecinos = [
+            (0, 1),  # Arriba
+            (0, -1), # Abajo
+            (1, 0),  # Derecha
+            (-1, 0)  # Izquierda
+        ]
+    
+        for dx, dy in vecinos:
+            x, y = node.x + dx, node.y + dy #sumamos la posicion del nodo a la contigua para obtener el vecino
+            if 0 <= x < self.xSize and 0 <= y < self.ySize:
+                if BCProblem.CanMove(self.map[x][y]):   #si el agente se puede mover aqui, añadimos el nodo a la lista de sucesores
+                    self.CreateNode(successors, node, x, y)
 
-        for dir_x, dir_y in directions:
-            successor_x = node.x + dir_x
-            successor_y = node.y + dir_y
-            if 0 <= successor_x < self.xSize and 0 <= successor_y < self.ySize:
-                successor:AgentConsts = self.map[successor_x][successor_y]
-                if BCProblem.CanMove(successor):
-                    self.CreateNode(successors, node, successor_x, successor_y)
         return successors
     
     #métodos estáticos

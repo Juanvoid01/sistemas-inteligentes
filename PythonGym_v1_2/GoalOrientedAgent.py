@@ -22,11 +22,11 @@ class GoalOrientedAgent(BaseAgent):
         }
         
         self.stateMachine = StateMachine("GoalOrientedBehavior",dictionary,"ExecutePlan")
-        self.problem = None
-        self.aStar = None
-        self.plan = None
-        self.goalMonitor = None
-        self.agentInit = False
+        self.problem:BCProblem = None
+        self.aStar:AStar = None
+        self.plan:list[BCNode] = None
+        self.goalMonitor:GoalMonitor = None
+        self.agentInit:bool = False
 
     #Metodo que se llama al iniciar el agente. No devuelve nada y sirve para contruir el agente
     def Start(self):
@@ -68,40 +68,15 @@ class GoalOrientedAgent(BaseAgent):
             #-le damos el modo inicial _CreateInitialNode
             #-establecer la meta actual al problema para que A* sepa cual es.
             #-Calcular el plan usando A*
-            #TODO creamos un plan, pasos:
-            #-con gualMonito, seleccionamos la meta actual (Que será la mas propicia => definir la estrategia a seguir).
-            #-le damos el modo inicial _CreateInitialNode
-            #-establecer la meta actual al problema para que A* sepa cual es.
-            #-Calcular el plan usando A*
-             # Obtenemos la meta más prioritaria según el GoalMonitor
-            current_goal = self.goalMonitor.GetCurrentGoal()
+            initial_node:BCNode = self._CreateInitialNode(perception)
+            goal:BCNode = self.goalMonitor.SelectGoal(perception=perception, map=map, agent=None)
+            self.problem.SetInitial(initial_node)
+            self.problem.SetGoal(goal)
             
-            # Creamos el nodo inicial basado en la posición actual del agente
-            initial_node = self._CreateInitialNode(perception)
-            
-            # Establecemos la meta actual en el problema
-            self.problem.SetGoal(current_goal)
-            
-            '''# Calculamos el plan usando A*
-                self.aStar.Solve(self.problem, initial_node)
-                
-                # Si encontramos un plan, lo mostramos (opcional)
-                if self.aStar.GetPlan():
-                    print("Nuevo plan generado:")
-                    GoalOrientedAgent.ShowPlan(self.aStar.GetPlan())
-
-            return self.aStar.GetPlan()'''
-             # Calcular el plan con A*
-            if self.aStar.Solve(self.problem, initial_node):
-                self.plan = self.aStar.GetPlan()
-                if self.plan:
-                    print("Nuevo plan generado:")
-                    GoalOrientedAgent.ShowPlan(self.plan)
-            else:
-                self.plan = []  # No hay camino
-                
-        return self.aStar.GetPlan()
-        
+        raw_plan = self.aStar.GetPlan()
+        optimized_plan = self._CleanPlan(raw_plan)
+        return optimized_plan
+    
     @staticmethod
     def CreateNodeByPerception(perception, value, perceptionID_X, perceptionID_Y,ySize):
         xMap, yMap = BCProblem.WorldToMapCoord(perception[perceptionID_X],perception[perceptionID_Y],ySize)
@@ -132,42 +107,24 @@ class GoalOrientedAgent(BaseAgent):
         # - inicializamos A*
         # - creamos un plan inicial
         print("TODO aqui faltan cosas :)")
-        goal1CommanCenter = None
+        goal1CommanCenter = self._CreateDefaultGoal(perception)
         goal2Life = self._CreateLifeGoal(perception)
         goal3Player = self._CreatePlayerGoal(perception)
         self.goalMonitor = GoalMonitor(self.problem,[goal1CommanCenter,goal2Life,goal3Player])
 
-        initial_node = self._CreateInitialNode(perception)
-        '''goal1 = self._CreateDefaultGoal(perception)
-        goal2 = self._CreateLifeGoal(perception)
-        goal3 = self._CreatePlayerGoal(perception)'''
-
-        goal_command_center = self._CreateDefaultGoal(perception)  # Meta 0: Centro de comando
-        goal_life = self._CreateLifeGoal(perception)               # Meta 1: Vida
-        goal_player = self._CreatePlayerGoal(perception)           # Meta 2: Jugador
-
-
-        # Obtener dimensiones del mapa
-        #self.xSize = sqrt(len(map))     # Ancho (columnas)
-        #self.ySize = len(map[0])   # Alto (filas)
-        #print("GoalOrientedAgent InitAgent Revisar que map es una lista 2D para obtener sus dimensiones")
-
-        # Calcular dimensiones del mapa (asumiendo que es cuadrado)
         map_size = int(len(map)**0.5)  # Si el mapa es 1D y cuadrado (ej: 15x15)
-        self.xSize = map_size
-        self.ySize = map_size
-        
-        # Crear el problema BCProblem con la meta inicial (COMMAND_CENTER)
-        self.problem = BCProblem(initial_node, goal_command_center, self.xSize, self.ySize)
-         # Inicializar el mapa en el problema
-        self.problem.InitMap(map)
-        # Inicializar A* en base al  mapa
-        self.aStar = AStar(self.problem)
+        xSize = map_size
+        ySize = map_size
 
-        self.goalMonitor = GoalMonitor(self.problem, [goal_command_center, goal_life, goal_player])
-        #self.goalMonitor = GoalMonitor(self.problem, [goal1, goal2, goal3])
+        initial_node:BCNode = self._CreateInitialNode(perception)
+        self.problem = BCProblem(initial_node, self.goalMonitor.SelectGoal(perception,map,None), xSize, ySize)
+        self.problem.InitMap(map)
+
+        self.aStar = AStar(self.problem)
+    
         # Generar el plan inicial
         self.plan = self._CreatePlan(perception, map)
+
 
     #muestra un plan por consola
     @staticmethod
@@ -182,3 +139,31 @@ class GoalOrientedAgent(BaseAgent):
     def End(self, win):
         super().End(win)
         self.stateMachine.End()
+    
+    def _CleanPlan(self, plan: list[BCNode]) -> list[BCNode]:
+
+        if len(plan) == 0:
+            return []
+
+        cleaned_list_with_only_turns:list[BCNode] = []
+        cleaned_list_with_only_turns.append(plan[0])
+
+        for index_in_plan in range(1, len(plan) - 1):
+
+            previous_node:BCNode = plan[index_in_plan - 1]
+            current_node:BCNode = plan[index_in_plan]
+            next_node:BCNode = plan[index_in_plan + 1]
+
+            dir_x_before:int = current_node.x - previous_node.x
+            dir_y_before:int = current_node.y - previous_node.y
+
+            dir_x_after:int  = next_node.x - current_node.x
+            dir_y_after:int  = next_node.y - current_node.y
+
+            # Si cambia la dirección (vector antes != vector después), lo añadimos
+            if dir_x_before != dir_x_after or dir_y_before != dir_y_after:
+                cleaned_list_with_only_turns.append(current_node)
+
+        cleaned_list_with_only_turns.append(plan[-1])
+
+        return cleaned_list_with_only_turns

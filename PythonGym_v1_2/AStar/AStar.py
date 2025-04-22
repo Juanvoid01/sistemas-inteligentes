@@ -1,5 +1,5 @@
 #AStar.py
-'''
+
 from AStar.Node import Node
 from AStar.Problem import Problem
 
@@ -8,7 +8,7 @@ from AStar.Problem import Problem
 class AStar:
 
     def __init__(self, problem:Problem):
-        self.open:list[Node] = [] # lista de abiertos o frontera de exploración
+        self.open:list[Node] = [] # lista de abiertos o frontera de exploración, lista ordenada por F
         self.processed:set = set() # set, conjunto de cerrados (más eficiente que una lista)
         self.problem:Problem = problem #problema a resolver
 
@@ -32,10 +32,9 @@ class AStar:
         self.InsertNode(start)
 
         while self.open:
-            # Seleccionar nodo con f más bajo
+            # Seleccionar nodo con f más bajo, tenemos una lista ordenada
             current = self.open.pop(0)
 
-            # Test de meta
             if self.problem.IsASolution(current):
                 return self.ReconstructPath(current)
 
@@ -108,9 +107,9 @@ class AStar:
                 hi = mid
         self.open.insert(lo, node)
 
+
+
 '''
-
-
 #Algoritmo A* genérico que resuelve cualquier problema descrito usando la plantilla de la
 #la calse Problem que tenga como nodos hijos de la clase Node
 class AStar:
@@ -121,7 +120,7 @@ class AStar:
         self.problem = problem #problema a resolver
 
 
-        self.solution = []# Camino solucion'''
+        self.solution = []# Camino solucion
 
     def GetPlan(self):
         findGoal = False
@@ -140,7 +139,7 @@ class AStar:
         #TODO implementar el bucle de búsqueda del algoritmo A*
 
         self.Solve(self, self.problem, self.problem.Initial())
-        return self.solution[::-1]  # Devuelve el camino invertido'''
+        return self.solution[::-1]  # Devuelve el camino invertido
 
         return path
 
@@ -241,6 +240,6 @@ class AStar:
             path.append(current)
             current = current.GetParent()
         return path
-
+'''
 
         
