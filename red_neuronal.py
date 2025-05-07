@@ -24,6 +24,8 @@ X[columns_to_normalize] = scaler.fit_transform(X[columns_to_normalize])
 # One-hot encode categorical variables. Create one new column for each possible value of month and day (0,1)
 X = pd.get_dummies(X, columns=['month', 'day'], drop_first=True).astype(float)
 
+#print(X)
+
 # Convert to numpy arrays for compatibility with sklearn
 X = X.values
 y = y.values
@@ -63,3 +65,4 @@ for train_index, test_index in rkf.split(X):
 # Compute and print the average MSE
 average_mse = np.mean(mse_list)
 print(f'Average Mean Squared Error: {average_mse:.4f}')
+
