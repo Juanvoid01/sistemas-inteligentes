@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neural_network import MLPRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import RepeatedKFold
 
 
@@ -43,8 +43,10 @@ mlp = MLPRegressor(
     random_state=None          # Random initialization for each run
 )
 
-# List to store MSE for each fold
+# Lists to store metrics for each fold
 mse_list = []
+mae_list = []
+r2_list = []
 
 # Perform cross-validation
 for train_index, test_index in rkf.split(X):
@@ -58,11 +60,21 @@ for train_index, test_index in rkf.split(X):
     # Predict on the test set
     y_pred = mlp.predict(X_test)
     
-    # Compute MSE and store it
+    # Compute metrics and store it
     mse = mean_squared_error(y_test, y_pred)
-    mse_list.append(mse)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-# Compute and print the average MSE
+    mse_list.append(mse)
+    mae_list.append(mae)
+    r2_list.append(r2)
+
+# Compute and print the average metrics
 average_mse = np.mean(mse_list)
+average_mae = np.mean(mae_list)
+average_r2 = np.mean(r2_list)
+
 print(f'Average Mean Squared Error: {average_mse:.4f}')
+print(f'Average Mean Absolute Error: {average_mae:.4f}')
+print(f'Average R^2: {average_r2:.4f}')
 
