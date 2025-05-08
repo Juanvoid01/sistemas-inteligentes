@@ -41,6 +41,10 @@ rf.fit(X_train, y_train)
 # Predict on the test set
 y_pred = rf.predict(X_test)
 
+# Unapply the logarithmic transformation
+y_test = np.expm1(y_test)
+y_pred = np.expm1(y_pred)
+
 # Evaluate the tuned model
 print("Random Forest RMSE:", mean_squared_error(y_test, y_pred))
 print("Random Forest R2 Score:", r2_score(y_test, y_pred))
